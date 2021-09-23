@@ -1,27 +1,28 @@
 import psycopg2
 
-def insert_sale(conn, order_num, order_type, cust_name, prod_number, 
-	prod_name, quantity, price, discount):
+def insert_sale(conn, order_num, order_type, cust_name, prod_number, prod_name, quantity, price, discount):
+	# calculate the order total
 	order_total = quantity * price
 	if discount != 0:
 		order_total = order_total * discount
-
+	# make a tuple with all the data
 	sale_data = (order_num, order_type, cust_name, prod_number, prod_name, 
 		quantity, price, discount, order_total)
+	# insert the data	
+	cursor = conn.cursor()
 
-	cur = conn.cursor()
+	# cursor.execute('''DELETE FROM SALES WHERE ORDER_NUM=1105910''')
 
-	cur.execute('''DELETE FROM SALES WHERE ORDER_NUM=1105910''')
-
-	cur.execute('''INSERT INTO SALES(ORDER_NUM, ORDER_TYPE, CUST_NAME,
+	cursor.execute('''INSERT INTO SALES(ORDER_NUM, ORDER_TYPE, CUST_NAME,
 		PROD_NUMBER, PROD_NAME, QUANTITY, PRICE, DISCOUNT, ORDER_TOTAL)
 	VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)''', sale_data)
+
 	conn.commit()
 
-	cur.execute('''SELECT CUST_NAME, ORDER_TOTAL 
-		FROM SALES WHERE ORDER_NUM=%s;''', (order_num,))
+	cursor.execute('''SELECT CUST_NAME, ORDER_TOTAL FROM SALES WHERE ORDER_NUM=%s;''', (order_num,))
 
-	rows = cur.fetchall()
+
+	rows = cursor.fetchall()
 	for row in rows:
 		print("CUST_NAME = ", row[0])
 		print("ORDER_TOTAL = ", row[1], "\n")
@@ -34,6 +35,9 @@ if __name__ == '__main__':
 		password="mypostgrespass",
 		host="localhost",
 		port="5432")
+	
+	# the information will be provided by the user
+	# the order_num is the primary key and the user should not be able to change it
 
 	order_num = int(input("What is the order number?\n"))
 	order_type = input("What is the order type: Retail or Wholesale?\n")
@@ -42,6 +46,8 @@ if __name__ == '__main__':
 	prod_name = input("What is the product name?\n")
 	quantity = float(input("How many were bought?\n"))
 	price = float(input("What is the price of the product?\n"))
+
+	# the best way to create a function that will handle the discount
 	discount = float(input("What is the discount, if there is one?\n"))
 
 	insert_sale(conn, order_num, order_type, cust_name, prod_number, prod_name, 
@@ -49,4 +55,4 @@ if __name__ == '__main__':
 
 	print("Data inserted!")
 
-	conn.close()
+conn.close()
