@@ -28,9 +28,10 @@ def insert_sale(conn, order_num, order_type, cust_name, prod_number,
 
 
 if __name__ == '__main__':
-	conn = psycopg2.connect(database="red30",
+	conn = psycopg2.connect(
+		database="red30",
 		user="postgres",
-		password="password",
+		password="mypostgrespass",
 		host="localhost",
 		port="5432")
 
